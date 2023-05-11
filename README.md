@@ -10,11 +10,13 @@
 # DBScanner
 
 - help
+
 ![](https://github.com/lynngeo/DBScanner/blob/master/pic/help.png)
 
 - 自动扫描内网常见sql、no-sql数据库脚本(mysql、mssql、oracle、postgresql、redis、mongodb、memcached、elasticsearch)，包含未授权访问及常规弱口令检测
 
-![](https://github.com/se55i0n/DBScanner/blob/master/scan.png)
+![](https://github.com/lynngeo/DBScanner/blob/master/pic/scan.png)
 
 - 支持指定ip，端口，策略进行扫描
+
 ![](https://github.com/lynngeo/DBScanner/blob/master/pic/strategy.png)
