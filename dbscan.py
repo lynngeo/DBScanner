@@ -2,28 +2,34 @@
 #coding:utf-8
 #Author:se55i0n
 #针对常见sql、No-sql数据库进行安全检查
+
+import gevent
+from gevent import monkey
+monkey.patch_all()
+
+
 import sys
 import IPy
 import time
 import socket
-import gevent
 import argparse
-from gevent import monkey
 from multiprocessing.dummy import Pool as ThreadPool
 from lib.config import *
 from lib.exploit import *
 
-monkey.patch_all()
+
 
 class DBScanner(object):
-	def __init__(self, target, thread):
+	def __init__(self, target, thread, port, strategy=None):
 		self.target = target
 		self.thread = thread
+		self.port = port
+		self.strategy = strategy
 		self.ips    = []
 		self.ports  = []
 		self.time   = time.time()
 		self.get_ip()
-		self.get_port()
+		self.ports = [port] if port else self.get_port()
 		self.check = check()
 	
 	def get_ip(self):
@@ -46,6 +52,11 @@ class DBScanner(object):
 			s.close()
 
 	def handle(self, ip, port):
+		if self.strategy == 'mysql':
+			self.check.mysql(ip, port)
+			exit()
+			
+			
 		for v,k in service.iteritems():
 			if k == str(port):
 				if v == 'mysql':
@@ -83,11 +94,11 @@ class DBScanner(object):
 		except Exception as e:
 			pass
 		except KeyboardInterrupt:
-			print u'\n{}[-] 用户终止扫描...{}'.format(R, W)
+			print(u'\n{}[-] 用户终止扫描...{}'.format(R, W))
 			sys.exit(1)
 		finally:
-			print '-'*55
-			print u'{}[+] 扫描完成耗时 {} 秒.{}'.format(O, time.time()-self.time, W) 
+			print('-'*55)
+			print(u'{}[+] 扫描完成耗时 {} 秒.{}'.format(O, time.time()-self.time, W))
 
 def banner():
 	banner = '''
@@ -97,16 +108,18 @@ def banner():
  / /_/ / /_/ /__/ / /__/ /_/ / / / / / / /  __/ /
 /_____/_____/____/\___/\__,_/_/ /_/_/ /_/\___/_/
     '''
-	print B + banner + W
-	print '-'*55
+	print(B + banner + W)
+	print('-'*55)
 
 def main():
 	banner()
 	parser = argparse.ArgumentParser(description='Example: python {} 192.168.1.0/24'.format(sys.argv[0]))
 	parser.add_argument('target', help=u'192.168.1.0/24')
 	parser.add_argument('-t', type=int, default=50, dest='thread', help=u'线程数(默认50)')
+	parser.add_argument('-p', type=int, dest ="port",help="指定要扫描的端口")
+	parser.add_argument("-s",dest ="strategy",help="指定要扫描的策略,如mysql")
 	args   = parser.parse_args()
-	myscan = DBScanner(args.target, args.thread)
+	myscan = DBScanner(args.target, args.thread, args.port, args.strategy)
 	myscan.run()
 
 if __name__ == '__main__':
